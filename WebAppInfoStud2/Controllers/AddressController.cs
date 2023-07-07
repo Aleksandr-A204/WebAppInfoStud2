@@ -27,7 +27,7 @@ namespace WebAppInfoStud.Controllers
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody] Address address)
+        public async Task<List<Address>> Post([FromBody] Address address)
         {
             using (var db = new InfoStudDB())
             {
@@ -35,34 +35,30 @@ namespace WebAppInfoStud.Controllers
                 await db.SaveChangesAsync();
             }
 
-            return "Added successfully";
+            return await Get();
         }
 
         [HttpPut]
-        public async Task<string> Put(Address address)
+        public async Task<List<Address>> Put(Address address)
         {
             using (var db = new InfoStudDB())
             {
-                var editAddr = await db.Addresses.FindAsync(address.Id);
+                var editAddress = await db.Addresses.FindAsync(address.Id);
 
-                if (editAddr != null)
+                if (editAddress != null)
                 {
-                    editAddr.City = address.City;
-                    editAddr.PostIndex = address.PostIndex;
-                    editAddr.Street = address.Street;
+                    editAddress.City = address.City;
+                    editAddress.PostIndex = address.PostIndex;
+                    editAddress.Street = address.Street;
 
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to edit this date.";
-                }
             }
-            return "Edited successfully";
+            return await Get();
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Delete(int id)
+        public async Task<List<Address>> Delete(int id)
         {
             using (var db = new InfoStudDB())
             {
@@ -74,12 +70,8 @@ namespace WebAppInfoStud.Controllers
 
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to delete this date.";
-                }
             }
-            return "Deleted successfully";
+            return await Get();
         }
     }
 }

@@ -12,17 +12,17 @@ namespace WebAppInfoStud.Controllers
         [HttpGet]
         public async Task<List<Curriculum>> Get()
         {
-            var currList = new List<Curriculum>();
+            var curriculumList = new List<Curriculum>();
 
             using (var db = new InfoStudDB())
             {
-                currList = await db.Curriculums.ToListAsync();
+                curriculumList = await db.Curriculums.ToListAsync();
             }
-            return currList;
+            return curriculumList;
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody]Curriculum curriculum)
+        public async Task<List<Curriculum>> Post([FromBody]Curriculum curriculum)
         {
             using(var db = new InfoStudDB())
             {
@@ -30,52 +30,44 @@ namespace WebAppInfoStud.Controllers
                 await db.SaveChangesAsync();
             }
 
-            return "Added successfully";
+            return await Get();
         }
 
         [HttpPut]
-        public async Task<string> Put(Curriculum curriculum)
+        public async Task<List<Curriculum>> Put(Curriculum curriculum)
         {
             using(var db = new InfoStudDB())
             {
-                var editCurr = await db.Curriculums.FindAsync(curriculum.Id);
+                var editCurriculum = await db.Curriculums.FindAsync(curriculum.Id);
 
-                if (editCurr != null)
+                if (editCurriculum != null)
                 {
-                    editCurr.Faculty = curriculum.Faculty;
-                    editCurr.Speciality = curriculum.Speciality;
-                    editCurr.Cource = curriculum.Cource;
-                    editCurr.Group = curriculum.Group;
+                    editCurriculum.Faculty = curriculum.Faculty;
+                    editCurriculum.Speciality = curriculum.Speciality;
+                    editCurriculum.Course = curriculum.Course;
+                    editCurriculum.Group = curriculum.Group;
 
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to edit the date.";
-                }
             }
-            return "Edited successfully";
+            return await Get();
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Delete(int id)
+        public async Task<List<Curriculum>> Delete(int id)
         {
             using(var db = new InfoStudDB())
             {
-                var editCurr = await db.Curriculums.FindAsync(id);
+                var deleteSelectedCurriculum = await db.Curriculums.FindAsync(id);
 
-                if(editCurr != null)
+                if(deleteSelectedCurriculum != null)
                 {
-                    db.Curriculums.Remove(editCurr);
+                    db.Curriculums.Remove(deleteSelectedCurriculum);
 
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to delete the date.";
-                }
             }
-            return "Deleted successfully";
+            return await Get();
         }
     }
 }

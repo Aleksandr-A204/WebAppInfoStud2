@@ -15,18 +15,18 @@ namespace WebAppInfoStud.Controllers
         [HttpGet]
         public async Task<List<Contact>> Get()
         {
-            var contList = new List<Contact>();
+            var contactList = new List<Contact>();
 
             using(var db = new InfoStudDB())
             {
-                contList = await db.Contacts.ToListAsync();
+                contactList = await db.Contacts.ToListAsync();
             }
 
-            return contList;
+            return contactList;
         }
 
         [HttpPost]
-        public async Task<string> Post(Contact contact)
+        public async Task<List<Contact>> Post(Contact contact)
         {
             using(var db = new InfoStudDB())
             {
@@ -34,49 +34,41 @@ namespace WebAppInfoStud.Controllers
                 await db.SaveChangesAsync();
             }
 
-            return "Added successfully";
+            return await Get();
         }
 
         [HttpPut]
-        public async Task<string> Put(Contact contact)
+        public async Task<List<Contact>> Put(Contact contact)
         {
             using (var db = new InfoStudDB())
             {
-                var editCont = await db.Contacts.FindAsync(contact.Id);
+                var editContact = await db.Contacts.FindAsync(contact.Id);
 
-                if(editCont != null)
+                if(editContact != null)
                 {
-                    editCont.Phone = contact.Phone;
-                    editCont.Email = contact.Email;
+                    editContact.Phone = contact.Phone;
+                    editContact.Email = contact.Email;
 
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to edit the date.";
-                }
             }
-            return "Edited successfully";
+            return await Get();
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Delete(int id)
+        public async Task<List<Contact>> Delete(int id)
         {
             using (var db = new InfoStudDB())
             {
-                var editCont = await db.Contacts.FindAsync(id);
+                var deleteSelectedContact = await db.Contacts.FindAsync(id);
 
-                if(editCont != null)
+                if(deleteSelectedContact != null)
                 {
-                    db.Contacts.Remove(editCont);
+                    db.Contacts.Remove(deleteSelectedContact);
                     await db.SaveChangesAsync();
                 }
-                else
-                {
-                    return "Error! Failed to delete the data.";
-                }
             }
-            return "Deleted successfully";
+            return await Get();
         }
     }
 }

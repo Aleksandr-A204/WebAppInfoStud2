@@ -9,12 +9,6 @@ namespace WebAppInfoStud.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-        public StudentController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
-
         [HttpGet]
         public async Task<List<Student>> Get()
         {
@@ -29,18 +23,18 @@ namespace WebAppInfoStud.Controllers
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody] Student student)
+        public async Task<List<Student>> Post([FromBody] Student student)
         {
             using(var db = new InfoStudDB())
             {
                 await db.Students.AddAsync(student);
                 await db.SaveChangesAsync();
             }
-            return "Added successfully";
+            return await Get();
         }
 
         [HttpPut]
-        public async Task<string> Put([FromBody] Student student)
+        public async Task<List<Student>> Put([FromBody] Student student)
         {
             using (var db = new InfoStudDB())
             {
@@ -58,7 +52,7 @@ namespace WebAppInfoStud.Controllers
                     editStudent.Address.Street = student.Address.Street;
                     editStudent.Curriculum.Faculty = student.Curriculum.Faculty;
                     editStudent.Curriculum.Speciality = student.Curriculum.Speciality;
-                    editStudent.Curriculum.Cource = student.Curriculum.Cource;
+                    editStudent.Curriculum.Course = student.Curriculum.Course;
                     editStudent.Curriculum.Group = student.Curriculum.Group;
                     editStudent.Contact!.Phone = student.Contact!.Phone;
                     editStudent.Contact.Email = student.Contact.Email;
@@ -66,11 +60,11 @@ namespace WebAppInfoStud.Controllers
                     await db.SaveChangesAsync();
                 }
             }
-            return "Edited successfully";
+            return await Get();
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Delete(int id)
+        public async Task<List<Student>> Delete(int id)
         {
             using(var db = new InfoStudDB())
             {
@@ -81,7 +75,7 @@ namespace WebAppInfoStud.Controllers
                     await db.SaveChangesAsync();
                 }
             }
-            return "Deleted successfully";
+            return await Get();
         }
     }
 }
