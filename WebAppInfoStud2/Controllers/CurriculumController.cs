@@ -1,73 +1,82 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
-namespace WebAppInfoStud.Controllers
+namespace WebAppInfoStud2.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class CurriculumController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Curriculum>> Get()
+        public async Task<List<Curriculum>> GetCurriculums()
         {
             var curriculumList = new List<Curriculum>();
 
-            using (var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
-                curriculumList = await db.Curriculums.ToListAsync();
+                curriculumList = await db.Curriculums.Include(c => c.Faculty)
+                                                    .Include(c => c.Speciality)
+                                                    .Include(c => c.Course)
+                                                    .Include(c => c.Group).ToListAsync();
             }
             return curriculumList;
         }
 
         [HttpPost]
-        public async Task<List<Curriculum>> Post([FromBody]Curriculum curriculum)
+        public async Task<List<Curriculum>> Post([FromBody] Curriculum curriculum)
         {
-            using(var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
                 await db.Curriculums.AddAsync(curriculum);
                 await db.SaveChangesAsync();
             }
 
-            return await Get();
+            return await GetCurriculums();
         }
 
         [HttpPut]
         public async Task<List<Curriculum>> Put(Curriculum curriculum)
         {
-            using(var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
                 var editCurriculum = await db.Curriculums.FindAsync(curriculum.Id);
 
                 if (editCurriculum != null)
                 {
-                    editCurriculum.Faculty = curriculum.Faculty;
-                    editCurriculum.Speciality = curriculum.Speciality;
-                    editCurriculum.Course = curriculum.Course;
-                    editCurriculum.Group = curriculum.Group;
+                    await db.Entry(editCurriculum).Reference(c => c.Faculty).LoadAsync();
+                    await db.Entry(editCurriculum).Reference(c => c.Speciality).LoadAsync();
+                    await db.Entry(editCurriculum).Reference(c => c.Course).LoadAsync();
+                    await db.Entry(editCurriculum).Reference(c => c.Group).LoadAsync();
+
+                    editCurriculum.FacultyId = curriculum.FacultyId;
+                    editCurriculum.SpecialityId = curriculum.SpecialityId;
+                    editCurriculum.CourseId = curriculum.CourseId;
+                    editCurriculum.GroupId = curriculum.GroupId;
 
                     await db.SaveChangesAsync();
                 }
             }
-            return await Get();
+            return await GetCurriculums();
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Curriculum>> Delete(int id)
+        public async Task<List<Curriculum>> Delete(long id)
         {
-            using(var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
-                var deleteSelectedCurriculum = await db.Curriculums.FindAsync(id);
+                var curriculum = await db.Curriculums.FindAsync(id);
 
-                if(deleteSelectedCurriculum != null)
+                if (curriculum != null)
                 {
-                    db.Curriculums.Remove(deleteSelectedCurriculum);
+                    db.Curriculums.Remove(curriculum);
 
                     await db.SaveChangesAsync();
                 }
             }
-            return await Get();
+            return await GetCurriculums();
         }
     }
 }

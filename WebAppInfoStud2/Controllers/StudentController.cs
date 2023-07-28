@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
-namespace WebAppInfoStud.Controllers
+namespace WebAppInfoStud2.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,70 +13,75 @@ namespace WebAppInfoStud.Controllers
         [HttpGet]
         public async Task<List<Student>> Get()
         {
-            var studList = new List<Student>();
+            var studentsList = new List<Student>();
 
-            using (var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
-                studList = await db.Students.Include(s => s.Address).Include(s => s.Curriculum).Include(s => s.Contact).ToListAsync();
+                studentsList = await db.Students.Include(s => s.Contact).ToListAsync();
             }
 
-            return studList;
+            return studentsList;
         }
 
         [HttpPost]
-        public async Task<List<Student>> Post([FromBody] Student student)
+        public async Task<List<Student>> Post(Student student)
         {
-            using(var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
                 await db.Students.AddAsync(student);
+
                 await db.SaveChangesAsync();
             }
+
             return await Get();
         }
 
         [HttpPut]
-        public async Task<List<Student>> Put([FromBody] Student student)
+        public async Task<List<Student>> Put(Student student)
         {
-            using (var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
                 var editStudent = await db.Students.FindAsync(student.Id);
 
                 if (editStudent != null)
                 {
-                    db.Entry(editStudent).Reference(edS => edS.Address).Load();
-                    db.Entry(editStudent).Reference(edS => edS.Curriculum).Load();
-                    db.Entry(editStudent).Reference(edS => edS.Contact).Load();
+                    await db.Entry(editStudent).Reference(s => s.Contact).LoadAsync();
 
                     editStudent.FullName = student.FullName;
-                    editStudent.Address.City = student.Address.City;
-                    editStudent.Address.PostIndex = student.Address.PostIndex;
-                    editStudent.Address.Street = student.Address.Street;
-                    editStudent.Curriculum.Faculty = student.Curriculum.Faculty;
-                    editStudent.Curriculum.Speciality = student.Curriculum.Speciality;
-                    editStudent.Curriculum.Course = student.Curriculum.Course;
-                    editStudent.Curriculum.Group = student.Curriculum.Group;
-                    editStudent.Contact!.Phone = student.Contact!.Phone;
+                    editStudent.City = student.City;
+                    editStudent.Postindex = student.Postindex;
+                    editStudent.Street = student.Street;
+                    editStudent.Faculty = student.Faculty;
+                    editStudent.Speciality = student.Speciality;
+                    editStudent.Course = student.Course;
+                    editStudent.Group = student.Group;
+                    editStudent.Contact.Phone = student.Contact.Phone;
                     editStudent.Contact.Email = student.Contact.Email;
 
                     await db.SaveChangesAsync();
                 }
             }
+
             return await Get();
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Student>> Delete(int id)
+        public async Task<List<Student>> Put(long id)
         {
-            using(var db = new InfoStudDB())
+            using (var db = new StudentContext())
             {
-                var student = await db.Students.FindAsync(id);
-                if (student != null)
+                var editStudent = await db.Students.FindAsync(id);
+
+                if (editStudent != null)
                 {
-                    db.Students.Remove(student);
+                    db.Students.Remove(editStudent);
+
                     await db.SaveChangesAsync();
                 }
             }
+
             return await Get();
         }
+
     }
 }
