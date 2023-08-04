@@ -23,56 +23,79 @@ namespace WebAppInfoStud2.Controllers
         }
 
         [HttpPost]
-        public async Task<List<Address>> PostAddress([FromBody] Address address)
+        public async Task<string> PostAddress([FromBody] Address address)
         {
-            using (var db = new StudentContext())
+            try
             {
-                await db.Addresses.AddAsync(address);
-                await db.SaveChangesAsync();
+                using (var db = new StudentContext())
+                {
+                    await db.Addresses.AddAsync(address);
+
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось добавить адрес.\n{ex}";
             }
 
-            return await GetAddresses();
+            return "Адрес добавлен успешно.";
         }
 
         [HttpPut]
-        public async Task<List<Address>> PutAddress(Address address)
+        public async Task<string> PutAddress(Address address)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var editAddress = await db.Addresses.FindAsync(address.Id);
-
-                if (editAddress != null)
+                using (var db = new StudentContext())
                 {
-                    db.Entry(editAddress).Reference(a => a.City).Load();
-                    db.Entry(editAddress).Reference(a => a.Postindex).Load();
-                    db.Entry(editAddress).Reference(a => a.Street).Load();
+                    var editAddress = await db.Addresses.FindAsync(address.Id);
 
-                    editAddress.CityId = address.CityId;
-                    editAddress.PostindexId = address.PostindexId;
-                    editAddress.StreetId = address.StreetId;
+                    if (editAddress != null)
+                    {
+                        db.Entry(editAddress).Reference(a => a.City).Load();
+                        db.Entry(editAddress).Reference(a => a.Postindex).Load();
+                        db.Entry(editAddress).Reference(a => a.Street).Load();
 
-                    await db.SaveChangesAsync();
+                        editAddress.CityId = address.CityId;
+                        editAddress.PostindexId = address.PostindexId;
+                        editAddress.StreetId = address.StreetId;
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось редактировать адрес.\n{ex}";
+            }
 
-            return await GetAddresses();
+            return "Адрес редактирован успешно.";
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Address>> DeleteAddress(long id)
+        public async Task<string> DeleteAddress(long id)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var address = await db.Addresses.FindAsync(id);
-
-                if (address != null)
+                using (var db = new StudentContext())
                 {
-                    db.Addresses.Remove(address);
-                    await db.SaveChangesAsync();
+                    var address = await db.Addresses.FindAsync(id);
+
+                    if (address != null)
+                    {
+                        db.Addresses.Remove(address);
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось удалить адрес.\n{ex}";
+            }
 
-            return await GetAddresses();
+            return "Адрес удален успешно.";
+
         }
     }
 }

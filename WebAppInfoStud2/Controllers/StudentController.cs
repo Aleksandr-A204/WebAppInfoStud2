@@ -10,78 +10,109 @@ namespace WebAppInfoStud2.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        [HttpGet]
-        public async Task<List<Student>> Get()
+        [HttpGet("{keywordSearch}")]
+        public async Task<List<Student>> Get(string keywordSearch)
         {
             var studentsList = new List<Student>();
 
             using (var db = new StudentContext())
             {
                 studentsList = await db.Students.Include(s => s.Contact).ToListAsync();
+
+                Console.WriteLine();
+                Console.Write(studentsList.Count);
             }
 
             return studentsList;
         }
 
         [HttpPost]
-        public async Task<List<Student>> Post(Student student)
+        public async Task<string> Post(Student student)
         {
-            using (var db = new StudentContext())
+            try
             {
-                await db.Students.AddAsync(student);
+                using (var db = new StudentContext())
+                {
+                    await db.Students.AddAsync(student);
 
-                await db.SaveChangesAsync();
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось добавить студента.\n{ex}";
             }
 
-            return await Get();
+            return "Студент добавлен успешно.";
         }
 
         [HttpPut]
-        public async Task<List<Student>> Put(Student student)
+        public async Task<string> Put(Student student)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var editStudent = await db.Students.FindAsync(student.Id);
-
-                if (editStudent != null)
+                using (var db = new StudentContext())
                 {
-                    await db.Entry(editStudent).Reference(s => s.Contact).LoadAsync();
+                    var editStudent = await db.Students.FindAsync(student.Id);
 
-                    editStudent.FullName = student.FullName;
-                    editStudent.City = student.City;
-                    editStudent.Postindex = student.Postindex;
-                    editStudent.Street = student.Street;
-                    editStudent.Faculty = student.Faculty;
-                    editStudent.Speciality = student.Speciality;
-                    editStudent.Course = student.Course;
-                    editStudent.Group = student.Group;
-                    editStudent.Contact.Phone = student.Contact.Phone;
-                    editStudent.Contact.Email = student.Contact.Email;
+                    if (editStudent != null)
+                    {
+                        await db.Entry(editStudent).Reference(s => s.Contact).LoadAsync();
 
-                    await db.SaveChangesAsync();
+                        editStudent.FullName = student.FullName;
+                        editStudent.City = student.City;
+                        editStudent.Postindex = student.Postindex;
+                        editStudent.Street = student.Street;
+                        editStudent.Faculty = student.Faculty;
+                        editStudent.Speciality = student.Speciality;
+                        editStudent.Course = student.Course;
+                        editStudent.Group = student.Group;
+                        editStudent.Contact.Phone = student.Contact.Phone;
+                        editStudent.Contact.Email = student.Contact.Email;
+
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось редактировать студента.\n{ex}";
+            }
 
-            return await Get();
+            return "Студент редактирован успешно.";
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Student>> Put(long id)
+        public async Task<string> Put(long id)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var editStudent = await db.Students.FindAsync(id);
-
-                if (editStudent != null)
+                using (var db = new StudentContext())
                 {
-                    db.Students.Remove(editStudent);
+                    var editStudent = await db.Students.FindAsync(id);
 
-                    await db.SaveChangesAsync();
+                    if (editStudent != null)
+                    {
+                        db.Students.Remove(editStudent);
+
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        throw new Exception();
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось удалить студента.\n{ex}";
+            }
 
-            return await Get();
+            return "Студент удален успешно.";
         }
-
     }
 }

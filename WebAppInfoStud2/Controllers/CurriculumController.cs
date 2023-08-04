@@ -26,57 +26,80 @@ namespace WebAppInfoStud2.Controllers
         }
 
         [HttpPost]
-        public async Task<List<Curriculum>> Post([FromBody] Curriculum curriculum)
+        public async Task<string> Post([FromBody] Curriculum curriculum)
         {
-            using (var db = new StudentContext())
+            try
             {
-                await db.Curriculums.AddAsync(curriculum);
-                await db.SaveChangesAsync();
+                using (var db = new StudentContext())
+                {
+                    await db.Curriculums.AddAsync(curriculum);
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось добавить учебный план.\n{ex}";
             }
 
-            return await GetCurriculums();
+            return "Учебный план добавлен успешно.";
         }
 
         [HttpPut]
-        public async Task<List<Curriculum>> Put(Curriculum curriculum)
+        public async Task<string> Put(Curriculum curriculum)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var editCurriculum = await db.Curriculums.FindAsync(curriculum.Id);
-
-                if (editCurriculum != null)
+                using (var db = new StudentContext())
                 {
-                    await db.Entry(editCurriculum).Reference(c => c.Faculty).LoadAsync();
-                    await db.Entry(editCurriculum).Reference(c => c.Speciality).LoadAsync();
-                    await db.Entry(editCurriculum).Reference(c => c.Course).LoadAsync();
-                    await db.Entry(editCurriculum).Reference(c => c.Group).LoadAsync();
+                    var editCurriculum = await db.Curriculums.FindAsync(curriculum.Id);
 
-                    editCurriculum.FacultyId = curriculum.FacultyId;
-                    editCurriculum.SpecialityId = curriculum.SpecialityId;
-                    editCurriculum.CourseId = curriculum.CourseId;
-                    editCurriculum.GroupId = curriculum.GroupId;
+                    if (editCurriculum != null)
+                    {
+                        await db.Entry(editCurriculum).Reference(c => c.Faculty).LoadAsync();
+                        await db.Entry(editCurriculum).Reference(c => c.Speciality).LoadAsync();
+                        await db.Entry(editCurriculum).Reference(c => c.Course).LoadAsync();
+                        await db.Entry(editCurriculum).Reference(c => c.Group).LoadAsync();
 
-                    await db.SaveChangesAsync();
+                        editCurriculum.FacultyId = curriculum.FacultyId;
+                        editCurriculum.SpecialityId = curriculum.SpecialityId;
+                        editCurriculum.CourseId = curriculum.CourseId;
+                        editCurriculum.GroupId = curriculum.GroupId;
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
-            return await GetCurriculums();
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось редактировать учебный план.\n{ex}";
+            }
+
+            return "Учебный план редактирован успешно.";
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Curriculum>> Delete(long id)
+        public async Task<string> Delete(long id)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var curriculum = await db.Curriculums.FindAsync(id);
-
-                if (curriculum != null)
+                using (var db = new StudentContext())
                 {
-                    db.Curriculums.Remove(curriculum);
+                    var curriculum = await db.Curriculums.FindAsync(id);
 
-                    await db.SaveChangesAsync();
+                    if (curriculum != null)
+                    {
+                        db.Curriculums.Remove(curriculum);
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
-            return await GetCurriculums();
+            catch (Exception ex)
+            {
+                return $"Ошибка! Не удалось удалить учебный план.\n{ex}";
+            }
+
+            return "Учебный план удален успешно.";
         }
     }
 }

@@ -23,53 +23,74 @@ namespace WebAppInfoStud2.Controllers
         }
 
         [HttpPost]
-        public async Task<List<Contact>> Post(Contact contact)
+        public async Task<string> Post(Contact contact)
         {
-            using (var db = new StudentContext())
+            try
             {
-                await db.Contacts.AddAsync(contact);
+                using (var db = new StudentContext())
+                {
+                    await db.Contacts.AddAsync(contact);
 
-                await db.SaveChangesAsync();
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch 
+            {
+                return "Ошибка! Не удалось добавить контакт.";
             }
 
-            return await Get();
+            return "Контакт добавлен успешно.";
         }
 
         [HttpPut]
-        public async Task<List<Contact>> PutContact(Contact contact)
+        public async Task<string> PutContact(Contact contact)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var editContact = await db.Contacts.FindAsync(contact.Id);
-
-                if(editContact != null)
+                using (var db = new StudentContext())
                 {
-                    editContact.Phone = contact.Phone;
-                    editContact.Email = contact.Email;
+                    var editContact = await db.Contacts.FindAsync(contact.Id);
 
-                    await db.SaveChangesAsync();
+                    if (editContact != null)
+                    {
+                        editContact.Phone = contact.Phone;
+                        editContact.Email = contact.Email;
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
+            catch 
+            {
+                return "Ошибка! Не удалось редактировать контакт.";
+            }
 
-            return await Get();
+            return "Контакт редактирован успешно.";
         }
 
         [HttpDelete("{id}")]
-        public async Task<List<Contact>> Delete(long id)
+        public async Task<string> Delete(long id)
         {
-            using (var db = new StudentContext())
+            try
             {
-                var contact = await db.Contacts.FindAsync(id);
-
-                if(contact != null)
+                using (var db = new StudentContext())
                 {
-                    db.Contacts.Remove(contact);
+                    var contact = await db.Contacts.FindAsync(id);
 
-                    await db.SaveChangesAsync();
+                    if (contact != null)
+                    {
+                        db.Contacts.Remove(contact);
+
+                        await db.SaveChangesAsync();
+                    }
                 }
             }
+            catch
+            {
+                return "Ошибка! Не удалось удалить контакт.";
+            }
 
-            return await Get();
+            return "Контакт редактирован успешно.";
         }
     }
 }
