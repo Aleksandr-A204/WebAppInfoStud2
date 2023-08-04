@@ -20,7 +20,7 @@ namespace WebAppInfoStud2.Controllers
                 studentsList = await db.Students.Include(s => s.Contact).ToListAsync();
 
                 Console.WriteLine();
-                Console.Write(studentsList.Count);
+                //studentsList.Count
             }
 
             return studentsList;
