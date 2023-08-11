@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using WebAppInfoStud2.Models;
 
-namespace WebAppInfoStud2.Context;
+namespace WebAppInfoStud2;
 
 public partial class StudentContext : DbContext
 {
     public StudentContext()
     {
+        Database.EnsureCreated();
     }
 
     public StudentContext(DbContextOptions<StudentContext> options)
@@ -37,11 +38,13 @@ public partial class StudentContext : DbContext
     public virtual DbSet<StreetTable> StreetTables { get; set; }
 
     public virtual DbSet<Student> Students { get; set; }
-    public object FacultyControllers { get; internal set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Student;Username=postgres;Password=1423");
+    {
+        optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=StudentData;Username=postgres;Password=1423");
+    }
+//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+//        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=Student;Username=postgres;Password=1423");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -51,6 +54,8 @@ public partial class StudentContext : DbContext
 
             entity.ToTable("address");
 
+            entity.HasIndex(e => new { e.CityId, e.PostindexId, e.StreetId }, "address_cityId_postindexId_streetId_key").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("cityId");
             entity.Property(e => e.PostindexId).HasColumnName("postindexId");
@@ -58,14 +63,17 @@ public partial class StudentContext : DbContext
 
             entity.HasOne(d => d.City).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.CityId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("address_cityId_fkey");
 
             entity.HasOne(d => d.Postindex).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.PostindexId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("address_postindexId_fkey");
 
             entity.HasOne(d => d.Street).WithMany(p => p.Addresses)
                 .HasForeignKey(d => d.StreetId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("address_streetId_fkey");
         });
 
@@ -114,6 +122,8 @@ public partial class StudentContext : DbContext
 
             entity.ToTable("curriculum");
 
+            entity.HasIndex(e => new { e.FacultyId, e.SpecialityId, e.CourseId, e.GroupId }, "curriculum_facultyId_specialityId_courseId_groupId_key").IsUnique();
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CourseId).HasColumnName("courseId");
             entity.Property(e => e.FacultyId).HasColumnName("facultyId");
@@ -122,18 +132,22 @@ public partial class StudentContext : DbContext
 
             entity.HasOne(d => d.Course).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.CourseId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("curriculum_courseId_fkey");
 
             entity.HasOne(d => d.Faculty).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.FacultyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("curriculum_facultyId_fkey");
 
             entity.HasOne(d => d.Group).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.GroupId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("curriculum_groupId_fkey");
 
             entity.HasOne(d => d.Speciality).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.SpecialityId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("curriculum_specialityId_fkey");
         });
 
@@ -205,18 +219,15 @@ public partial class StudentContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.City).HasColumnName("city");
-            entity.Property(e => e.ContactId).HasColumnName("contactId");
             entity.Property(e => e.Course).HasColumnName("course");
+            entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.Faculty).HasColumnName("faculty");
             entity.Property(e => e.FullName).HasColumnName("fullName");
             entity.Property(e => e.Group).HasColumnName("group");
+            entity.Property(e => e.Phone).HasColumnName("phone");
             entity.Property(e => e.Postindex).HasColumnName("postindex");
             entity.Property(e => e.Speciality).HasColumnName("speciality");
             entity.Property(e => e.Street).HasColumnName("street");
-
-            entity.HasOne(d => d.Contact).WithMany(p => p.Students)
-                .HasForeignKey(d => d.ContactId)
-                .HasConstraintName("student_contactId_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

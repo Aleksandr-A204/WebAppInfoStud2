@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers
@@ -10,16 +9,23 @@ namespace WebAppInfoStud2.Controllers
     public class AddressController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Address>> GetAddresses()
+        public async Task<List<Address>> GetAllAddresses(string? keywordSearch)
         {
-            var addressList = new List<Address>();
+            var filterByAddress = new List<Address>();
 
             using (var db = new StudentContext())
             {
-                addressList = await db.Addresses.Include(a => a.City).Include(a => a.Postindex).Include(a => a.Street).ToListAsync();
+                var addressList = await db.Addresses.Include(a => a.City).Include(a => a.Postindex).Include(a => a.Street).ToListAsync();
+
+                if (keywordSearch is null)
+                    filterByAddress = addressList;
+                else
+                    filterByAddress.AddRange(addressList.Where(a => a.City.City.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
+                    || a.Street.Street.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
+                    || a.Postindex.PostIndex.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)));
             }
 
-            return addressList;
+            return filterByAddress;
         }
 
         [HttpPost]

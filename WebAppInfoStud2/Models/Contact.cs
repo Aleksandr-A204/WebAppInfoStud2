@@ -10,6 +10,4 @@ public partial class Contact
     public string Phone { get; set; } = null!;
 
     public string Email { get; set; } = null!;
-
-    public virtual ICollection<Student> Students { get; set; } = new List<Student>();
 }

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers

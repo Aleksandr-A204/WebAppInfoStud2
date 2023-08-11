@@ -9,21 +9,21 @@ public partial class Student
 
     public string FullName { get; set; } = null!;
 
-    public string? City { get; set; }
+    public string City { get; set; } = null!;
 
-    public string? Postindex { get; set; }
+    public string Postindex { get; set; } = null!;
 
-    public string? Street { get; set; }
+    public string Street { get; set; } = null!;
 
-    public string? Faculty { get; set; }
+    public string Faculty { get; set; } = null!;
 
-    public string? Speciality { get; set; }
+    public string Speciality { get; set; } = null!;
 
-    public string? Course { get; set; }
+    public string Course { get; set; } = null!;
 
-    public string? Group { get; set; }
+    public string Group { get; set; } = null!;
 
-    public long? ContactId { get; set; }
+    public string Phone { get; set; } = null!;
 
-    public virtual Contact? Contact { get; set; }
+    public string Email { get; set; } = null!;
 }

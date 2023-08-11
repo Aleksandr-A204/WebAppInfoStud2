@@ -7,19 +7,19 @@ public partial class Curriculum
 {
     public long Id { get; set; }
 
-    public long? FacultyId { get; set; }
+    public long FacultyId { get; set; }
 
-    public long? SpecialityId { get; set; }
+    public long SpecialityId { get; set; }
 
-    public long? CourseId { get; set; }
+    public long CourseId { get; set; }
 
-    public long? GroupId { get; set; }
+    public long GroupId { get; set; }
 
-    public virtual CourseTable? Course { get; set; }
+    public virtual CourseTable Course { get; set; } = null!;
 
-    public virtual FacultyTable? Faculty { get; set; }
+    public virtual FacultyTable Faculty { get; set; } = null!;
 
-    public virtual GroupTable? Group { get; set; }
+    public virtual GroupTable Group { get; set; } = null!;
 
-    public virtual SpecialityTable? Speciality { get; set; }
+    public virtual SpecialityTable Speciality { get; set; } = null!;
 }

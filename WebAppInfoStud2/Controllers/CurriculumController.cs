@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers
@@ -11,18 +10,27 @@ namespace WebAppInfoStud2.Controllers
     public class CurriculumController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Curriculum>> GetCurriculums()
+        public async Task<List<Curriculum>> GetCurriculums(string? keywordSearch)
         {
-            var curriculumList = new List<Curriculum>();
+            var filterByCurriculum = new List<Curriculum>();
 
             using (var db = new StudentContext())
             {
-                curriculumList = await db.Curriculums.Include(c => c.Faculty)
+                var curriculumList = await db.Curriculums.Include(c => c.Faculty)
                                                     .Include(c => c.Speciality)
                                                     .Include(c => c.Course)
                                                     .Include(c => c.Group).ToListAsync();
+
+                if (keywordSearch is null || keywordSearch == string.Empty)
+                    filterByCurriculum = curriculumList;
+                else
+                    filterByCurriculum.AddRange(curriculumList.Where(c => c.Faculty.Faculty.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
+                    || c.Speciality.Speciality.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
+                    || c.Course.Course.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
+                    || c.Group.Group.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)));
             }
-            return curriculumList;
+
+            return filterByCurriculum;
         }
 
         [HttpPost]

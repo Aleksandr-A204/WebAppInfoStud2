@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using WebAppInfoStud2.Context;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers
@@ -10,24 +8,43 @@ namespace WebAppInfoStud2.Controllers
     [ApiController]
     public class StudentController : ControllerBase
     {
-        [HttpGet("{keywordSearch}")]
-        public async Task<List<Student>> Get(string keywordSearch)
+        [HttpGet]
+        public async Task<List<Student>> GetAllStudents(string? keywordSearch, string? sortProperty, string? sortType)
         {
-            var studentsList = new List<Student>();
+            keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
+
+            var students = new List<Student>();
 
             using (var db = new StudentContext())
             {
-                studentsList = await db.Students.Include(s => s.Contact).ToListAsync();
+                IQueryable<Student> allStudents = db.Students;
 
-                Console.WriteLine();
-                //studentsList.Count
+                if (keywordSearch != string.Empty)
+                    allStudents = allStudents.Where(s => EF.Functions.Like(s.FullName.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.City.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Street.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Postindex.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Faculty.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Speciality.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Course.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Group.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Phone.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.Email.ToLower(), $"%{keywordSearch}%"));
+
+
+                if (sortType is not null && sortProperty is not null && sortType != "None")
+                    allStudents = sortType == "Asc" ? allStudents.OrderBy(s => EF.Property<string>(s, sortProperty))
+                        : allStudents.OrderByDescending(s => EF.Property<string>(s, sortProperty));
+
+                students = await allStudents.ToListAsync();
             }
 
-            return studentsList;
+
+            return students;
         }
 
         [HttpPost]
-        public async Task<string> Post(Student student)
+        public async Task<string> Post([FromBody] Student student)
         {
             try
             {
@@ -57,8 +74,6 @@ namespace WebAppInfoStud2.Controllers
 
                     if (editStudent != null)
                     {
-                        await db.Entry(editStudent).Reference(s => s.Contact).LoadAsync();
-
                         editStudent.FullName = student.FullName;
                         editStudent.City = student.City;
                         editStudent.Postindex = student.Postindex;
@@ -67,8 +82,8 @@ namespace WebAppInfoStud2.Controllers
                         editStudent.Speciality = student.Speciality;
                         editStudent.Course = student.Course;
                         editStudent.Group = student.Group;
-                        editStudent.Contact.Phone = student.Contact.Phone;
-                        editStudent.Contact.Email = student.Contact.Email;
+                        editStudent.Phone = student.Phone;
+                        editStudent.Email = student.Email;
 
                         await db.SaveChangesAsync();
                     }
@@ -87,7 +102,7 @@ namespace WebAppInfoStud2.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Put(long id)
+        public async Task<string> DeleteStudent(long id)
         {
             try
             {
