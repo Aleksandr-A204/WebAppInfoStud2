@@ -10,7 +10,7 @@ namespace WebAppInfoStud2.Controllers
     public class FacultyController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<FacultyTable>> Get()
+        public async Task<ActionResult> Get()
         {
             var facultyList = new List<FacultyTable>();
 
@@ -18,7 +18,8 @@ namespace WebAppInfoStud2.Controllers
             {
                 facultyList = await db.FacultyTables.ToListAsync();
             }
-            return facultyList;
+
+            return Ok(facultyList);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers
@@ -10,31 +11,32 @@ namespace WebAppInfoStud2.Controllers
     public class CurriculumController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Curriculum>> GetCurriculums(string? keywordSearch)
+        public async Task<ActionResult> GetAllCurriculums(string? keywordSearch)
         {
-            var filterByCurriculum = new List<Curriculum>();
+            var curriculums = new List<Curriculum>();
+            keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
 
             using (var db = new StudentContext())
             {
-                var curriculumList = await db.Curriculums.Include(c => c.Faculty)
+                IQueryable<Curriculum> allCurriculums = db.Curriculums.Include(c => c.Faculty)
                                                     .Include(c => c.Speciality)
                                                     .Include(c => c.Course)
-                                                    .Include(c => c.Group).ToListAsync();
+                                                    .Include(c => c.Group);
 
-                if (keywordSearch is null || keywordSearch == string.Empty)
-                    filterByCurriculum = curriculumList;
-                else
-                    filterByCurriculum.AddRange(curriculumList.Where(c => c.Faculty.Faculty.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
-                    || c.Speciality.Speciality.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
-                    || c.Course.Course.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
-                    || c.Group.Group.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)));
+                if (keywordSearch != string.Empty)
+                        allCurriculums = allCurriculums.Where(a => EF.Functions.Like(a.Faculty.Faculty.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(a.Speciality.Speciality.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(a.Course.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(a.Group.ToLower(), $"%{keywordSearch}%"));
+
+                curriculums = await allCurriculums.ToListAsync();
             }
 
-            return filterByCurriculum;
+            return Ok(curriculums);
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody] Curriculum curriculum)
+        public async Task<ActionResult> Post([FromBody] Curriculum curriculum)
         {
             try
             {
@@ -46,68 +48,51 @@ namespace WebAppInfoStud2.Controllers
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось добавить учебный план.\n{ex}";
+                return NotFound($"Ошибка! Не удалось добавить учебный план.\n{ex}");
             }
 
-            return "Учебный план добавлен успешно.";
+            return Ok("Учебный план добавлен успешно.");
         }
 
         [HttpPut]
-        public async Task<string> Put(Curriculum curriculum)
+        public async Task<ActionResult> Put(Curriculum curriculum)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var editCurriculum = await db.Curriculums.FindAsync(curriculum.Id);
+                    db.Entry(curriculum).State = EntityState.Modified;
 
-                    if (editCurriculum != null)
-                    {
-                        await db.Entry(editCurriculum).Reference(c => c.Faculty).LoadAsync();
-                        await db.Entry(editCurriculum).Reference(c => c.Speciality).LoadAsync();
-                        await db.Entry(editCurriculum).Reference(c => c.Course).LoadAsync();
-                        await db.Entry(editCurriculum).Reference(c => c.Group).LoadAsync();
-
-                        editCurriculum.FacultyId = curriculum.FacultyId;
-                        editCurriculum.SpecialityId = curriculum.SpecialityId;
-                        editCurriculum.CourseId = curriculum.CourseId;
-                        editCurriculum.GroupId = curriculum.GroupId;
-
-                        await db.SaveChangesAsync();
-                    }
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось редактировать учебный план.\n{ex}";
+                return NotFound($"Ошибка! Не удалось редактировать учебный план.\n{ex}");
             }
 
-            return "Учебный план редактирован успешно.";
+            return Ok("Учебный план редактирован успешно.");
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> Delete(long id)
+        public async Task<ActionResult> Delete(long id)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var curriculum = await db.Curriculums.FindAsync(id);
+                    var curriculum = new Curriculum { Id = id };
+                    db.Entry(curriculum).State = EntityState.Deleted;
 
-                    if (curriculum != null)
-                    {
-                        db.Curriculums.Remove(curriculum);
-
-                        await db.SaveChangesAsync();
-                    }
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось удалить учебный план.\n{ex}";
+                return NotFound($"Ошибка! Не удалось удалить учебный план.\n{ex}");
             }
 
-            return "Учебный план удален успешно.";
+            return Ok("Учебный план удален успешно.");
         }
     }
 }

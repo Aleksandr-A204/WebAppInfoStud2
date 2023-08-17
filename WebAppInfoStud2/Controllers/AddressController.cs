@@ -9,27 +9,28 @@ namespace WebAppInfoStud2.Controllers
     public class AddressController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Address>> GetAllAddresses(string? keywordSearch)
+        public async Task<ActionResult> GetAllAddresses(string? keywordSearch)
         {
-            var filterByAddress = new List<Address>();
+            var addresses = new List<Address>();
+            keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
 
             using (var db = new StudentContext())
             {
-                var addressList = await db.Addresses.Include(a => a.City).Include(a => a.Postindex).Include(a => a.Street).ToListAsync();
+                IQueryable<Address> alladdresses = db.Addresses.Include(a => a.City).Include(a => a.Postindex).Include(a => a.Street);
 
-                if (keywordSearch is null)
-                    filterByAddress = addressList;
-                else
-                    filterByAddress.AddRange(addressList.Where(a => a.City.City.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
-                    || a.Street.Street.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)
-                    || a.Postindex.PostIndex.Contains(keywordSearch, StringComparison.OrdinalIgnoreCase)));
+                if (keywordSearch != string.Empty)
+                    alladdresses = alladdresses.Where(a => EF.Functions.Like(a.City.City.ToLower(), $"%{keywordSearch}%")
+                        || EF.Functions.Like(a.Street.Street.ToLower(), $"%{keywordSearch}%")
+                        || EF.Functions.Like(a.Postindex.PostIndex.ToLower(), $"%{keywordSearch}%"));
+
+                addresses = await alladdresses.ToListAsync();
             }
 
-            return filterByAddress;
+            return Ok(addresses);
         }
 
         [HttpPost]
-        public async Task<string> PostAddress([FromBody] Address address)
+        public async Task<ActionResult> PostAddress([FromBody] Address address)
         {
             try
             {
@@ -42,65 +43,51 @@ namespace WebAppInfoStud2.Controllers
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось добавить адрес.\n{ex}";
+                return NotFound($"Ошибка! Не удалось добавить адрес.\n{ex}");
             }
 
-            return "Адрес добавлен успешно.";
+            return Ok("Адрес добавлен успешно.");
         }
 
         [HttpPut]
-        public async Task<string> PutAddress(Address address)
+        public async Task<ActionResult> PutAddress(Address address)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var editAddress = await db.Addresses.FindAsync(address.Id);
+                    db.Entry(address).State = EntityState.Modified;
 
-                    if (editAddress != null)
-                    {
-                        db.Entry(editAddress).Reference(a => a.City).Load();
-                        db.Entry(editAddress).Reference(a => a.Postindex).Load();
-                        db.Entry(editAddress).Reference(a => a.Street).Load();
-
-                        editAddress.CityId = address.CityId;
-                        editAddress.PostindexId = address.PostindexId;
-                        editAddress.StreetId = address.StreetId;
-
-                        await db.SaveChangesAsync();
-                    }
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось редактировать адрес.\n{ex}";
+                return NotFound($"Ошибка! Не удалось редактировать адрес.\n{ex}");
             }
 
-            return "Адрес редактирован успешно.";
+            return Ok("Адрес редактирован успешно.");
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> DeleteAddress(long id)
+        public async Task<ActionResult> DeleteAddress(long id)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var address = await db.Addresses.FindAsync(id);
+                    var address = new Address { Id = id };
 
-                    if (address != null)
-                    {
-                        db.Addresses.Remove(address);
-                        await db.SaveChangesAsync();
-                    }
+                    db.Entry(address).State = EntityState.Deleted;
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось удалить адрес.\n{ex}";
+                return NotFound($"Ошибка! Не удалось удалить адрес.\n{ex}");
             }
 
-            return "Адрес удален успешно.";
+            return Ok("Адрес удален успешно.");
 
         }
     }

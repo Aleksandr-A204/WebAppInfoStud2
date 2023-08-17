@@ -10,15 +10,15 @@ namespace WebAppInfoStud2.Controllers
     public class StreetController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<StreetTable>> Get()
+        public async Task<ActionResult> Get()
         {
-            var streetList = new List<StreetTable>();
+            var allStreet= new List<StreetTable>();
 
             using (var db = new StudentContext())
             {
-                streetList = await db.StreetTables.ToListAsync();
+                allStreet = await db.StreetTables.ToListAsync();
             }
-            return streetList;
+            return Ok(allStreet);
         }
     }
 }

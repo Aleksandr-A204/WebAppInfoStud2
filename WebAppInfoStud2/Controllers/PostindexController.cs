@@ -10,7 +10,7 @@ namespace WebAppInfoStud2.Controllers
     public class PostindexController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<PostindexTable>> Get()
+        public async Task<ActionResult> Get()
         {
             var postindexList = new List<PostindexTable>();
 
@@ -18,7 +18,8 @@ namespace WebAppInfoStud2.Controllers
             {
                 postindexList = await db.PostindexTables.ToListAsync();
             }
-            return postindexList;
+
+            return Ok(postindexList);
         }
     }
 }

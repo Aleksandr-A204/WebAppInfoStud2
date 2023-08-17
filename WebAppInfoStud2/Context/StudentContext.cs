@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2;
@@ -21,15 +19,9 @@ public partial class StudentContext : DbContext
 
     public virtual DbSet<CityTable> CityTables { get; set; }
 
-    public virtual DbSet<Contact> Contacts { get; set; }
-
-    public virtual DbSet<CourseTable> CourseTables { get; set; }
-
     public virtual DbSet<Curriculum> Curriculums { get; set; }
 
     public virtual DbSet<FacultyTable> FacultyTables { get; set; }
-
-    public virtual DbSet<GroupTable> GroupTables { get; set; }
 
     public virtual DbSet<PostindexTable> PostindexTables { get; set; }
 
@@ -55,6 +47,16 @@ public partial class StudentContext : DbContext
             entity.ToTable("address");
 
             entity.HasIndex(e => new { e.CityId, e.PostindexId, e.StreetId }, "address_cityId_postindexId_streetId_key").IsUnique();
+
+            entity.HasData(
+                new Address { Id = 1, CityId = 1, StreetId = 2, PostindexId = 1 },
+                new Address { Id = 2, CityId = 1, StreetId = 2, PostindexId = 3 },
+                new Address { Id = 3, CityId = 2, StreetId = 1, PostindexId = 2 },
+                new Address { Id = 4, CityId = 1, StreetId = 1, PostindexId = 3 },
+                new Address { Id = 5, CityId = 1, StreetId = 1, PostindexId = 1 },
+                new Address { Id = 6, CityId = 1, StreetId = 4, PostindexId = 4 },
+                new Address { Id = 7, CityId = 3, StreetId = 3, PostindexId = 5 }
+            );
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.CityId).HasColumnName("cityId");
@@ -85,35 +87,14 @@ public partial class StudentContext : DbContext
 
             entity.HasIndex(e => e.City, "cityTable_city_key").IsUnique();
 
+            entity.HasData(
+                new CityTable { Id = 1, City = "Ставрополь" },
+                new CityTable { Id = 2, City = "Москва" },
+                new CityTable { Id = 3, City = "Нижний новгород" }
+            );
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.City).HasColumnName("city");
-        });
-
-        modelBuilder.Entity<Contact>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("PK_Contacts");
-
-            entity.ToTable("contact");
-
-            entity.HasIndex(e => e.Email, "contacts_Email_key").IsUnique();
-
-            entity.HasIndex(e => e.Phone, "contacts_Phone_key").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Email).HasColumnName("email");
-            entity.Property(e => e.Phone).HasColumnName("phone");
-        });
-
-        modelBuilder.Entity<CourseTable>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("courseTable_pkey");
-
-            entity.ToTable("courseTable");
-
-            entity.HasIndex(e => e.Course, "courseTable_course_key").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Course).HasColumnName("course");
         });
 
         modelBuilder.Entity<Curriculum>(entity =>
@@ -122,28 +103,27 @@ public partial class StudentContext : DbContext
 
             entity.ToTable("curriculum");
 
-            entity.HasIndex(e => new { e.FacultyId, e.SpecialityId, e.CourseId, e.GroupId }, "curriculum_facultyId_specialityId_courseId_groupId_key").IsUnique();
+            entity.HasIndex(e => new { e.FacultyId, e.SpecialityId, e.Course, e.Group }, "curriculum_facultyId_specialityId_course_group_key").IsUnique();
+
+            entity.HasData(
+                new Curriculum { Id = 1, FacultyId = 1, SpecialityId = 1, Course = "5", Group = "КМБ-с-о-19-1" },
+                new Curriculum { Id = 2, FacultyId = 2, SpecialityId = 3, Course = "3", Group = "ФИЗ-б-о-21-1" },
+                new Curriculum { Id = 3, FacultyId = 1, SpecialityId = 2, Course = "4", Group = "ИВТ-б-о-20-1" },
+                new Curriculum { Id = 4, FacultyId = 1, SpecialityId = 4, Course = "1", Group = "ИНБ-м-о-22-1" },
+                new Curriculum { Id = 5, FacultyId = 2, SpecialityId = 3, Course = "1", Group = "ФИЗ-б-о-23-1" },
+                new Curriculum { Id = 6, FacultyId = 2, SpecialityId = 3, Course = "2", Group = "ФИЗ-б-о-22-1" }
+            );
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.CourseId).HasColumnName("courseId");
+            entity.Property(e => e.Course).HasColumnName("course");
             entity.Property(e => e.FacultyId).HasColumnName("facultyId");
-            entity.Property(e => e.GroupId).HasColumnName("groupId");
+            entity.Property(e => e.Group).HasColumnName("group");
             entity.Property(e => e.SpecialityId).HasColumnName("specialityId");
-
-            entity.HasOne(d => d.Course).WithMany(p => p.Curriculums)
-                .HasForeignKey(d => d.CourseId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("curriculum_courseId_fkey");
 
             entity.HasOne(d => d.Faculty).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.FacultyId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("curriculum_facultyId_fkey");
-
-            entity.HasOne(d => d.Group).WithMany(p => p.Curriculums)
-                .HasForeignKey(d => d.GroupId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("curriculum_groupId_fkey");
 
             entity.HasOne(d => d.Speciality).WithMany(p => p.Curriculums)
                 .HasForeignKey(d => d.SpecialityId)
@@ -159,20 +139,14 @@ public partial class StudentContext : DbContext
 
             entity.HasIndex(e => e.Faculty, "facultyTable_faculty_key").IsUnique();
 
+            entity.HasData(
+                new FacultyTable { Id = 1, Faculty = "Институт цифрового развития" },
+                new FacultyTable { Id = 2, Faculty = "Институт математики и естественных наук" },
+                new FacultyTable { Id = 3, Faculty = "Гуманитарный институт" }
+            );
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Faculty).HasColumnName("faculty");
-        });
-
-        modelBuilder.Entity<GroupTable>(entity =>
-        {
-            entity.HasKey(e => e.Id).HasName("groupTable_pkey");
-
-            entity.ToTable("groupTable");
-
-            entity.HasIndex(e => e.Group, "groupTable_group_key").IsUnique();
-
-            entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.Group).HasColumnName("group");
         });
 
         modelBuilder.Entity<PostindexTable>(entity =>
@@ -182,6 +156,15 @@ public partial class StudentContext : DbContext
             entity.ToTable("postindexTable");
 
             entity.HasIndex(e => e.PostIndex, "postindexTable_postIndex_key").IsUnique();
+
+            entity.HasData(
+                new PostindexTable { Id = 1, PostIndex = "134406" },
+                new PostindexTable { Id = 2, PostIndex = "311206" },
+                new PostindexTable { Id = 3, PostIndex = "300209" },
+                new PostindexTable { Id = 4, PostIndex = "326009" },
+                new PostindexTable { Id = 5, PostIndex = "316006" },
+                new PostindexTable { Id = 6, PostIndex = "318006" }
+            );
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.PostIndex).HasColumnName("postIndex");
@@ -195,6 +178,13 @@ public partial class StudentContext : DbContext
 
             entity.HasIndex(e => e.Speciality, "specialityTable_speciality_key").IsUnique();
 
+            entity.HasData(
+                new SpecialityTable { Id = 1, Speciality = "Компьютерная безопасность" },
+                new SpecialityTable { Id = 2, Speciality = "Информатика и вычислительная техника" },
+                new SpecialityTable { Id = 3, Speciality = "Физика" },
+                new SpecialityTable { Id = 4, Speciality = "Информационная безопасность" }
+            );
+
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Speciality).HasColumnName("speciality");
         });
@@ -206,6 +196,14 @@ public partial class StudentContext : DbContext
             entity.ToTable("streetTable");
 
             entity.HasIndex(e => e.Street, "streetTable_street_key").IsUnique();
+
+            entity.HasData(
+                new StreetTable { Id = 1, Street = "Доваторцев" },
+                new StreetTable { Id = 2, Street = "Кабардинская" },
+                new StreetTable { Id = 3, Street = "Кулакова" },
+                new StreetTable { Id = 4, Street = "Суварова" },
+                new StreetTable { Id = 5, Street = "Мальбохова" }
+            );
 
             entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.Street).HasColumnName("street");

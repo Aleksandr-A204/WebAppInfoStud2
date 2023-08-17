@@ -9,16 +9,16 @@ namespace WebAppInfoStud2.Controllers
     [ApiController]
     public class GroupController : ControllerBase
     {
-        [HttpGet]
-        public async Task<List<GroupTable>> Get()
-        {
-            var groupList = new List<GroupTable>();
+        //[HttpGet]
+        //public async Task<List<GroupTable>> Get()
+        //{
+        //    var groupList = new List<GroupTable>();
 
-            using (var db = new StudentContext())
-            {
-                groupList = await db.GroupTables.ToListAsync();
-            }
-            return groupList;
-        }
+        //    using (var db = new StudentContext())
+        //    {
+        //        groupList = await db.GroupTables.ToListAsync();
+        //    }
+        //    return groupList;
+        //}
     }
 }

@@ -10,7 +10,7 @@ namespace WebAppInfoStud2.Controllers
     public class CityController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<CityTable>> Get()
+        public async Task<ActionResult> Get()
         {
             var cityList = new List<CityTable>();
 
@@ -18,7 +18,7 @@ namespace WebAppInfoStud2.Controllers
             {
                 cityList = await db.CityTables.ToListAsync();
             }
-            return cityList;
+            return Ok(cityList);
         }
     }
 }

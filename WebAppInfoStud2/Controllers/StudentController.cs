@@ -9,10 +9,9 @@ namespace WebAppInfoStud2.Controllers
     public class StudentController : ControllerBase
     {
         [HttpGet]
-        public async Task<List<Student>> GetAllStudents(string? keywordSearch, string? sortProperty, string? sortType)
+        public async Task<ActionResult> GetAllStudents(string? keywordSearch, string? sortProperty, string? sortType)
         {
             keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
-
             var students = new List<Student>();
 
             using (var db = new StudentContext())
@@ -39,12 +38,11 @@ namespace WebAppInfoStud2.Controllers
                 students = await allStudents.ToListAsync();
             }
 
-
-            return students;
+            return Ok(students);
         }
 
         [HttpPost]
-        public async Task<string> Post([FromBody] Student student)
+        public async Task<ActionResult> Post([FromBody] Student student)
         {
             try
             {
@@ -57,77 +55,51 @@ namespace WebAppInfoStud2.Controllers
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось добавить студента.\n{ex}";
+                return NotFound($"Ошибка! Не удалось добавить студента.\n{ex}");
             }
 
-            return "Студент добавлен успешно.";
+            return Ok("Студент добавлен успешно.");
         }
 
         [HttpPut]
-        public async Task<string> Put(Student student)
+        public async Task<ActionResult> Put(Student student)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var editStudent = await db.Students.FindAsync(student.Id);
+                    db.Entry(student).State = EntityState.Modified;
 
-                    if (editStudent != null)
-                    {
-                        editStudent.FullName = student.FullName;
-                        editStudent.City = student.City;
-                        editStudent.Postindex = student.Postindex;
-                        editStudent.Street = student.Street;
-                        editStudent.Faculty = student.Faculty;
-                        editStudent.Speciality = student.Speciality;
-                        editStudent.Course = student.Course;
-                        editStudent.Group = student.Group;
-                        editStudent.Phone = student.Phone;
-                        editStudent.Email = student.Email;
-
-                        await db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        throw new Exception();
-                    }
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось редактировать студента.\n{ex}";
+                return NotFound($"Ошибка! Не удалось редактировать студента.\n{ex}");
             }
 
-            return "Студент редактирован успешно.";
+            return Ok("Студент редактирован успешно.");
         }
 
         [HttpDelete("{id}")]
-        public async Task<string> DeleteStudent(long id)
+        public async Task<IActionResult> DeleteStudent(long id)
         {
             try
             {
                 using (var db = new StudentContext())
                 {
-                    var editStudent = await db.Students.FindAsync(id);
+                    var student = new Student { Id = id };
 
-                    if (editStudent != null)
-                    {
-                        db.Students.Remove(editStudent);
-
-                        await db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        throw new Exception();
-                    }
+                    db.Entry(student).State = EntityState.Deleted;
+                    await db.SaveChangesAsync();
                 }
             }
             catch (Exception ex)
             {
-                return $"Ошибка! Не удалось удалить студента.\n{ex}";
+                return NotFound($"Ошибка! Не удалось удалить студента.\n{ex}");
             }
 
-            return "Студент удален успешно.";
+            return Ok("Студент удален успешно.");
         }
     }
 }
