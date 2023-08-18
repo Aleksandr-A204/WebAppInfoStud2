@@ -22,11 +22,11 @@ public partial class Address
     public long StreetId { get; set; }
 
     [DataMember(Name = "city")]
-    public virtual CityTable City { get; set; } = null!;
+    public virtual CityTable? City { get; set; }
 
     [DataMember(Name = "postindex")]
-    public virtual PostindexTable Postindex { get; set; } = null!;
+    public virtual PostindexTable? Postindex { get; set; }
 
     [DataMember(Name = "street")]
-    public virtual StreetTable Street { get; set; } = null!;
+    public virtual StreetTable? Street { get; set; }
 }

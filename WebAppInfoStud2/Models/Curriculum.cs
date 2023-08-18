@@ -21,8 +21,8 @@ public partial class Curriculum
     public string Group { get; set; } = null!;
 
     [DataMember(Name = "faculty")]
-    public virtual FacultyTable Faculty { get; set; } = null!;
+    public virtual FacultyTable? Faculty { get; set; }
 
     [DataMember(Name = "speciality")]
-    public virtual SpecialityTable Speciality { get; set; } = null!;
+    public virtual SpecialityTable? Speciality { get; set; }
 }

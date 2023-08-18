@@ -18,10 +18,7 @@ namespace WebAppInfoStud2.Controllers
 
             using (var db = new StudentContext())
             {
-                IQueryable<Curriculum> allCurriculums = db.Curriculums.Include(c => c.Faculty)
-                                                    .Include(c => c.Speciality)
-                                                    .Include(c => c.Course)
-                                                    .Include(c => c.Group);
+                IQueryable<Curriculum> allCurriculums = db.Curriculums.Include(c => c.Faculty).Include(c => c.Speciality);
 
                 if (keywordSearch != string.Empty)
                         allCurriculums = allCurriculums.Where(a => EF.Functions.Like(a.Faculty.Faculty.ToLower(), $"%{keywordSearch}%")
