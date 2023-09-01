@@ -216,7 +216,7 @@ public partial class StudentContext : DbContext
             entity.ToTable("student");
 
             entity.Property(e => e.Id).HasColumnName("id");
-            entity.Property(e => e.City).HasColumnName("city");
+            entity.Property(e => e.CityId).HasColumnName("cityId");
             entity.Property(e => e.Course).HasColumnName("course");
             entity.Property(e => e.Email).HasColumnName("email");
             entity.Property(e => e.Faculty).HasColumnName("faculty");
@@ -226,6 +226,11 @@ public partial class StudentContext : DbContext
             entity.Property(e => e.Postindex).HasColumnName("postindex");
             entity.Property(e => e.Speciality).HasColumnName("speciality");
             entity.Property(e => e.Street).HasColumnName("street");
+
+            entity.HasOne(d => d.City).WithMany(p => p.Students)
+            .HasForeignKey(d => d.CityId)
+            .OnDelete(DeleteBehavior.ClientSetNull)
+            .HasConstraintName("student_cityId_fkey");
         });
 
         OnModelCreatingPartial(modelBuilder);

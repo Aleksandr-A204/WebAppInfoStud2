@@ -9,12 +9,11 @@ public partial class Student
     [DataMember(Name = "id")]
     public long Id { get; set; }
 
-
     [DataMember(Name = "fullName")]
     public string FullName { get; set; } = null!;
 
-    [DataMember(Name = "city")]
-    public string City { get; set; } = null!;
+    [DataMember(Name = "cityId")]
+    public long CityId { get; set; }
 
     [DataMember(Name = "postindex")]
     public string Postindex { get; set; } = null!;
@@ -39,4 +38,7 @@ public partial class Student
 
     [DataMember(Name = "email")]
     public string Email { get; set; } = null!;
+
+    [DataMember(Name = "city")]
+    public virtual CityTable? City { get; set; }
 }

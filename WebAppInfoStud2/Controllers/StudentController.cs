@@ -16,11 +16,11 @@ namespace WebAppInfoStud2.Controllers
 
             using (var db = new StudentContext())
             {
-                IQueryable<Student> allStudents = db.Students;
+                IQueryable<Student> allStudents = db.Students.Include(a => a.City);
 
                 if (keywordSearch != string.Empty)
                     allStudents = allStudents.Where(s => EF.Functions.Like(s.FullName.ToLower(), $"%{keywordSearch}%")
-                    || EF.Functions.Like(s.City.ToLower(), $"%{keywordSearch}%")
+                    || EF.Functions.Like(s.City.City.ToLower(), $"%{keywordSearch}%")
                     || EF.Functions.Like(s.Street.ToLower(), $"%{keywordSearch}%")
                     || EF.Functions.Like(s.Postindex.ToLower(), $"%{keywordSearch}%")
                     || EF.Functions.Like(s.Faculty.ToLower(), $"%{keywordSearch}%")

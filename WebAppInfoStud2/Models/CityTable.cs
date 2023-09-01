@@ -13,4 +13,7 @@ public partial class CityTable
 
     [DataMember(Name = "addresses")]
     public virtual ICollection<Address> Addresses { get; set; } = new List<Address>();
+
+    [DataMember(Name = "students")]
+    public virtual ICollection<Student> Students { get; set; } = new List<Student>();
 }
