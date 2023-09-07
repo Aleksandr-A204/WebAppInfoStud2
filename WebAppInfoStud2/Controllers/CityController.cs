@@ -12,13 +12,15 @@ namespace WebAppInfoStud2.Controllers
         [HttpGet]
         public async Task<ActionResult> Get()
         {
-            var cityList = new List<CityTable>();
+            var cities = new List<CityTable>();
 
             using (var db = new StudentContext())
             {
-                cityList = await db.CityTables.ToListAsync();
+                IQueryable<CityTable> allCities = db.CityTables;
+
+                cities = await allCities.ToListAsync();
             }
-            return Ok(cityList);
+            return Ok(cities);
         }
     }
 }

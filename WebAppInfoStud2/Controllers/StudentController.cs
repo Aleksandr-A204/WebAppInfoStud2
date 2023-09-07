@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 using WebAppInfoStud2.Models;
 
 namespace WebAppInfoStud2.Controllers
@@ -32,8 +33,14 @@ namespace WebAppInfoStud2.Controllers
 
 
                 if (sortType is not null && sortProperty is not null && sortType != "None")
-                    allStudents = sortType == "Asc" ? allStudents.OrderBy(s => EF.Property<string>(s, sortProperty))
-                        : allStudents.OrderByDescending(s => EF.Property<string>(s, sortProperty));
+                {
+                    if (sortProperty.Contains("City"))
+                        allStudents = sortType == "Asc" ? allStudents.OrderBy(s => s.City.City)
+                                : allStudents.OrderByDescending(s => s.City.City);
+                    else
+                        allStudents = sortType == "Asc" ? allStudents.OrderBy(s => EF.Property<string>(s, sortProperty))
+                                : allStudents.OrderByDescending(s => EF.Property<string>(s, sortProperty));
+                }
 
                 students = await allStudents.ToListAsync();
             }

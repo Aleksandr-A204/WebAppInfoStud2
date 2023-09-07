@@ -9,7 +9,7 @@ namespace WebAppInfoStud2.Controllers
     public class AddressController : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult> GetAllAddresses(string? keywordSearch)
+        public async Task<ActionResult> GetAllAddresses(string? keywordSearch, string? sortProperty, string? sortType)
         {
             var addresses = new List<Address>();
             keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
@@ -22,6 +22,14 @@ namespace WebAppInfoStud2.Controllers
                     alladdresses = alladdresses.Where(a => EF.Functions.Like(a.City.City.ToLower(), $"%{keywordSearch}%")
                         || EF.Functions.Like(a.Street.Street.ToLower(), $"%{keywordSearch}%")
                         || EF.Functions.Like(a.Postindex.PostIndex.ToLower(), $"%{keywordSearch}%"));
+
+                if (sortType is not null && sortProperty is not null && sortType != "None")
+                    if (sortProperty.Contains("city"))
+                        alladdresses = sortType == "Asc" ? alladdresses.OrderBy(s => s.City.City) : alladdresses.OrderByDescending(s => s.City.City);
+                    else if(sortProperty.Contains("street"))
+                        alladdresses = sortType == "Asc" ? alladdresses.OrderBy(s => s.Street.Street): alladdresses.OrderByDescending(s => s.Street.Street);
+                    else
+                        alladdresses = sortType == "Asc" ? alladdresses.OrderBy(s => s.Postindex.PostIndex) : alladdresses.OrderByDescending(s => s.Postindex.PostIndex);
 
                 addresses = await alladdresses.ToListAsync();
             }

@@ -11,7 +11,7 @@ namespace WebAppInfoStud2.Controllers
     public class CurriculumController : ControllerBase
     {
         [HttpGet]
-        public async Task<ActionResult> GetAllCurriculums(string? keywordSearch)
+        public async Task<ActionResult> GetAllCurriculums(string? keywordSearch, string? sortProperty, string? sortType)
         {
             var curriculums = new List<Curriculum>();
             keywordSearch = keywordSearch?.ToLower() ?? string.Empty;
@@ -25,6 +25,16 @@ namespace WebAppInfoStud2.Controllers
                     || EF.Functions.Like(a.Speciality.Speciality.ToLower(), $"%{keywordSearch}%")
                     || EF.Functions.Like(a.Course.ToLower(), $"%{keywordSearch}%")
                     || EF.Functions.Like(a.Group.ToLower(), $"%{keywordSearch}%"));
+
+                if (sortType is not null && sortProperty is not null && sortType != "None")
+                    if (sortProperty.Contains("faculty"))
+                        allCurriculums = sortType == "Asc" ? allCurriculums.OrderBy(s => s.Faculty.Faculty) : allCurriculums.OrderByDescending(s => s.Faculty.Faculty);
+                    else if (sortProperty.Contains("speciality"))
+                        allCurriculums = sortType == "Asc" ? allCurriculums.OrderBy(s => s.Speciality.Speciality) : allCurriculums.OrderByDescending(s => s.Speciality.Speciality);
+                    else if(sortProperty.Contains("course"))
+                        allCurriculums = sortType == "Asc" ? allCurriculums.OrderBy(s => s.Course) : allCurriculums.OrderByDescending(s => s.Course);
+                    else
+                        allCurriculums = sortType == "Asc" ? allCurriculums.OrderBy(s => s.Group) : allCurriculums.OrderByDescending(s => s.Group);
 
                 curriculums = await allCurriculums.ToListAsync();
             }

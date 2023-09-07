@@ -11,14 +11,7 @@ namespace WebAppInfoStud2.Controllers
         [HttpGet]
         public ActionResult Get()
         {
-            var courseList = new List<CourseEntity>() { 
-                new CourseEntity { Id = 1, Course = "1" },
-                new CourseEntity { Id = 2, Course = "2" },
-                new CourseEntity { Id = 3, Course = "3" },
-                new CourseEntity { Id = 4, Course = "4" },
-                new CourseEntity { Id = 5, Course = "5" },
-                new CourseEntity { Id = 6, Course = "6" },
-            };
+            var courseList = new List<string>() { "1", "2", "3", "4", "5", "6" };
 
             return Ok(courseList);
         }
